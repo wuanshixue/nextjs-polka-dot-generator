@@ -1,0 +1,584 @@
+@import "tailwindcss";
+
+:root {
+  --background: #e7e6e2;
+  --foreground: #1f2427;
+  --panel: #eeede9;
+  --paper: #f9f9f7;
+  --line: #b7b5ae;
+  --accent: #0e5f73;
+  --accent-strong: #094653;
+  --ui-font: "Source Han Sans SC", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", var(--font-geist-sans), sans-serif;
+  --display-font: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "STSong", serif;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--ui-font);
+  overflow: hidden;
+}
+
+.dotlab-root {
+  height: 100dvh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 12%, rgba(14, 95, 115, 0.08), transparent 32%),
+    radial-gradient(circle at 92% 86%, rgba(255, 127, 50, 0.09), transparent 34%),
+    var(--background);
+}
+
+.dotlab-topbar {
+  height: 64px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 20px;
+  background: color-mix(in srgb, var(--background) 82%, white 18%);
+}
+
+.dotlab-topbar h1 {
+  font-size: 30px;
+  letter-spacing: 0.04em;
+  font-weight: 650;
+  font-family: var(--display-font);
+}
+
+.dotlab-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dotlab-topbar p {
+  max-width: 760px;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  color: color-mix(in srgb, var(--foreground) 74%, white 26%);
+  text-align: right;
+}
+
+.dotlab-theme-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.dotlab-theme-switch button {
+  height: 32px;
+  min-width: 86px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel) 90%, white 10%);
+  color: var(--foreground);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+}
+
+.dotlab-theme-switch button.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 15%, white 85%);
+}
+
+.dotlab-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 332px 1fr;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.dotlab-panel {
+  border-right: 1px solid var(--line);
+  background: linear-gradient(180deg, #ecebe6 0%, #e4e2dc 100%);
+  padding: 20px;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.dotlab-panel h2 {
+  margin: 0 0 16px;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: color-mix(in srgb, var(--foreground) 82%, white 18%);
+  font-family: "Source Han Sans SC", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.dotlab-panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dotlab-panel input,
+.dotlab-panel select,
+.dotlab-panel button {
+  font: inherit;
+}
+
+.dotlab-panel input[type="number"],
+.dotlab-panel select {
+  height: 34px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: 0 10px;
+}
+
+.dotlab-panel input[type="file"] {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel) 92%, white 8%);
+  padding: 7px 8px;
+  font-size: 12px;
+}
+
+.dotlab-panel .dotlab-secondary {
+  width: 100%;
+  height: 34px;
+  border: 1px solid color-mix(in srgb, var(--accent) 70%, #213139 30%);
+  background: color-mix(in srgb, var(--panel) 92%, white 8%);
+  margin-bottom: 14px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.dotlab-unit-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.dotlab-unit-switch button {
+  height: 32px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel) 88%, white 12%);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.dotlab-unit-switch button.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 15%, white 85%);
+  color: color-mix(in srgb, var(--accent-strong) 88%, black 12%);
+}
+
+.dotlab-panel input[type="color"] {
+  width: 100%;
+  height: 34px;
+  border: 1px solid var(--line);
+  background: transparent;
+  padding: 3px;
+}
+
+.dotlab-panel input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.dotlab-panel span {
+  font-size: 12px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: color-mix(in srgb, var(--foreground) 70%, white 30%);
+}
+
+.dotlab-hint {
+  margin: 0 0 14px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--foreground) 72%, white 28%);
+}
+
+.dotlab-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.dotlab-checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  text-transform: none;
+  letter-spacing: 0.01em;
+}
+
+.dotlab-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
+.dotlab-preset-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.dotlab-chip {
+  border: 1px solid color-mix(in srgb, var(--line) 80%, #45545b 20%);
+  background: color-mix(in srgb, #f3f2ec 92%, white 8%);
+  padding: 6px 9px;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.dotlab-chip:hover {
+  border-color: var(--accent);
+}
+
+.dotlab-bayer-matrix {
+  margin-top: 6px;
+  display: grid;
+  gap: 1px;
+  background: #8a8a86;
+  border: 1px solid #7e7d78;
+  padding: 1px;
+}
+
+.dotlab-bayer-matrix span,
+.dotlab-bayer-cell {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+.dotlab-bayer-cell {
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.dotlab-bayer-cell:hover {
+  outline: 1px solid #f5b95d;
+  outline-offset: -1px;
+}
+
+.dotlab-bayer-cell:active {
+  outline: 1px solid #fff2c2;
+  outline-offset: -1px;
+}
+
+.dotlab-root.theme-mono {
+  --background: #e5e5e4;
+  --foreground: #151515;
+  --panel: #e3e3e1;
+  --paper: #f5f5f3;
+  --line: #6f6f6a;
+  --accent: #202020;
+  --accent-strong: #080808;
+  --ui-font: "IBM Plex Mono", "JetBrains Mono", "Cascadia Mono", "Consolas", monospace;
+  --display-font: "IBM Plex Mono", "JetBrains Mono", "Cascadia Mono", "Consolas", monospace;
+  background:
+    repeating-linear-gradient(180deg, rgba(0, 0, 0, 0.015) 0, rgba(0, 0, 0, 0.015) 1px, transparent 1px, transparent 3px),
+    #e6e6e4;
+  letter-spacing: 0.005em;
+}
+
+.dotlab-root.theme-mono .dotlab-topbar {
+  background: #dededb;
+  border-bottom-color: #7f7f79;
+}
+
+.dotlab-root.theme-mono .dotlab-topbar h1 {
+  letter-spacing: 0;
+  font-weight: 560;
+}
+
+.dotlab-root.theme-mono .dotlab-topbar p {
+  letter-spacing: 0.01em;
+}
+
+.dotlab-root.theme-mono .dotlab-panel {
+  background: #e1e1df;
+}
+
+.dotlab-root.theme-mono .dotlab-panel h2 {
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.dotlab-root.theme-mono .dotlab-panel h2::before {
+  content: "[ ] ";
+}
+
+.dotlab-root.theme-mono .dotlab-panel label {
+  text-transform: none;
+  letter-spacing: 0.005em;
+}
+
+.dotlab-root.theme-mono .dotlab-panel label::before {
+  content: "- ";
+  color: #4f4f4b;
+}
+
+.dotlab-root.theme-mono .dotlab-panel input,
+.dotlab-root.theme-mono .dotlab-panel select,
+.dotlab-root.theme-mono .dotlab-panel button,
+.dotlab-root.theme-mono .dotlab-panel textarea,
+.dotlab-root.theme-mono .dotlab-theme-switch button {
+  border: 1px solid #72726d;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  color: #141414;
+}
+
+.dotlab-root.theme-mono .dotlab-panel input[type="number"],
+.dotlab-root.theme-mono .dotlab-panel select,
+.dotlab-root.theme-mono .dotlab-panel input[type="file"],
+.dotlab-root.theme-mono .dotlab-panel .dotlab-secondary,
+.dotlab-root.theme-mono .dotlab-unit-switch button,
+.dotlab-root.theme-mono .dotlab-chip,
+.dotlab-root.theme-mono .dotlab-actions button,
+.dotlab-root.theme-mono .dotlab-theme-switch button {
+  min-height: 30px;
+  height: 30px;
+  line-height: 1;
+  font-size: 11px;
+  letter-spacing: 0.01em;
+}
+
+.dotlab-root.theme-mono .dotlab-panel input[type="range"] {
+  appearance: none;
+  height: 16px;
+  background: transparent;
+  accent-color: #101010;
+}
+
+.dotlab-root.theme-mono .dotlab-panel input[type="range"]::-webkit-slider-runnable-track {
+  height: 1px;
+  background: #7b7b76;
+}
+
+.dotlab-root.theme-mono .dotlab-panel input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 8px;
+  height: 8px;
+  margin-top: -3px;
+  border: 1px solid #151515;
+  border-radius: 0;
+  background: #f2f2ef;
+}
+
+.dotlab-root.theme-mono .dotlab-panel input[type="checkbox"] {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border: 1px solid #6f6f69;
+  border-radius: 0;
+  background: #ececea;
+}
+
+.dotlab-root.theme-mono .dotlab-panel input[type="checkbox"]:checked {
+  background: linear-gradient(45deg, #111 0, #111 100%);
+}
+
+.dotlab-root.theme-mono .dotlab-unit-switch button::before,
+.dotlab-root.theme-mono .dotlab-chip::before,
+.dotlab-root.theme-mono .dotlab-actions button::before {
+  content: "[ ] ";
+}
+
+.dotlab-root.theme-mono .dotlab-unit-switch button.active::before,
+.dotlab-root.theme-mono .dotlab-theme-switch button.active::before {
+  content: "[*] ";
+}
+
+.dotlab-root.theme-mono .dotlab-chip,
+.dotlab-root.theme-mono .dotlab-actions button,
+.dotlab-root.theme-mono .dotlab-unit-switch button,
+.dotlab-root.theme-mono .dotlab-theme-switch button,
+.dotlab-root.theme-mono .dotlab-panel .dotlab-secondary {
+  border-radius: 0;
+}
+
+.dotlab-root.theme-mono .dotlab-actions button {
+  background: transparent;
+  border-color: #52524f;
+  color: #141414;
+}
+
+.dotlab-root.theme-mono .dotlab-actions button:hover {
+  background: #d8d8d5;
+}
+
+.dotlab-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.dotlab-actions button {
+  height: 38px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #f4f7f8;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+
+.dotlab-actions button:hover {
+  background: var(--accent-strong);
+}
+
+.dotlab-preview-wrap {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: stretch;
+  padding: 16px;
+  overflow: hidden;
+  background:
+    linear-gradient(45deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0.08)),
+    repeating-linear-gradient(
+      45deg,
+      color-mix(in srgb, #cfcdc4 60%, transparent) 0,
+      color-mix(in srgb, #cfcdc4 60%, transparent) 14px,
+      transparent 14px,
+      transparent 28px
+    ),
+    #d5d3cc;
+}
+
+.dotlab-preview-scroll {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.dotlab-preview-board {
+  max-width: min(100%, 84vw);
+  max-height: calc(100dvh - 148px);
+  border: 1px solid #d2d0c9;
+  background: var(--paper);
+  box-shadow:
+    0 22px 48px rgba(32, 33, 28, 0.17),
+    0 2px 0 rgba(255, 255, 255, 0.7) inset;
+  padding: 24px;
+}
+
+.dotlab-preview-board svg {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100dvh - 210px);
+  width: auto;
+  height: auto;
+}
+
+.dotlab-preview-image-board {
+  min-width: max-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dotlab-canvas {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100dvh - 210px);
+  width: auto;
+  height: auto;
+}
+
+.dotlab-canvas.hidden {
+  display: none;
+}
+
+.dotlab-empty {
+  margin: 32px;
+  font-size: 15px;
+  color: color-mix(in srgb, var(--foreground) 68%, white 32%);
+}
+
+.dotlab-meta {
+  margin-top: 12px;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: color-mix(in srgb, var(--foreground) 66%, white 34%);
+}
+
+@media (max-width: 980px) {
+  .dotlab-topbar {
+    height: auto;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 14px 16px;
+  }
+
+  .dotlab-topbar h1 {
+    font-size: 28px;
+  }
+
+  .dotlab-topbar p {
+    text-align: left;
+  }
+
+  .dotlab-topbar-right {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dotlab-theme-switch {
+    width: 100%;
+  }
+
+  .dotlab-main {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .dotlab-panel {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    max-height: 48vh;
+  }
+
+  .dotlab-preview-wrap {
+    padding: 12px;
+  }
+
+  .dotlab-preview-board {
+    padding: 14px;
+  }
+}
