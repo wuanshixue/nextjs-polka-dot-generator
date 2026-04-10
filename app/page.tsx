@@ -2,7 +2,20 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-type ModeType = "dot" | "image";
+type ModeType = "dot" | "image" | "studio";
+type ShapeType = "circle" | "star" | "square" | "crescent" | "image";
+
+interface StudioShape {
+  id: string;
+  type: ShapeType;
+  x: number;
+  y: number;
+  size: number;
+  color: string;
+  rotation: number;
+  imageSrc?: string;
+  imageAspect?: number;
+}
 type ThemeType = "default" | "mono";
 type PatternType = "grid" | "brick" | "diagonal" | "diamond";
 type UnitType = "mm" | "px";
@@ -634,6 +647,11 @@ export default function Home() {
   const [asciiBackgroundColor, setAsciiBackgroundColor] = useState("#f2f2f2");
   const [asciiForegroundColor, setAsciiForegroundColor] = useState("#111111");
 
+  const [studioShapes, setStudioShapes] = useState<StudioShape[]>([]);
+  const [selectedShapeId, setSelectedShapeId] = useState<string | null>(null);
+  const [studioBackgroundColor, setStudioBackgroundColor] = useState("#ffffff");
+  const [studioBackgroundImage, setStudioBackgroundImage] = useState<string | null>(null);
+
   const pageWidthPx = useMemo(() => mmToPx(pageWidthMm), [pageWidthMm]);
   const pageHeightPx = useMemo(() => mmToPx(pageHeightMm), [pageHeightMm]);
 
@@ -1115,6 +1133,145 @@ export default function Home() {
     return mmToPx(mmValue).toFixed(0);
   };
 
+  const addStudioShape = (type: ShapeType, imageSrc?: string, imageAspect?: number) => {
+    const newShape: StudioShape = {
+      id: crypto.randomUUID(),
+      type,
+      x: pageWidthPx / 2,
+      y: pageHeightPx / 2,
+      size: Math.min(pageWidthPx, pageHeightPx) * (type === "image" ? 0.3 : 0.1),
+      color: "#093d52",
+      rotation: 0,
+      imageSrc,
+      imageAspect,
+    };
+    setStudioShapes([...studioShapes, newShape]);
+    setSelectedShapeId(newShape.id);
+  };
+
+  const handleStudioImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const src = String(e.target?.result);
+      const img = new Image();
+      img.onload = () => {
+        addStudioShape("image", src, img.width / img.height);
+      };
+      img.src = src;
+    };
+    reader.readAsDataURL(file);
+    event.target.value = "";
+  };
+
+  const handleStudioBgImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const src = String(e.target?.result);
+      const img = new Image();
+      img.onload = () => {
+        setStudioBackgroundImage(src);
+        setPageWidthMm(pxToMm(img.width));
+        setPageHeightMm(pxToMm(img.height));
+        setPaperPreset("Custom");
+      };
+      img.src = src;
+    };
+    reader.readAsDataURL(file);
+    event.target.value = "";
+  };
+
+  const updateStudioShape = (id: string, updates: Partial<StudioShape>) => {
+    setStudioShapes((prev) => prev.map(s => s.id === id ? { ...s, ...updates } : s));
+  };
+
+  const removeStudioShape = (id: string) => {
+    setStudioShapes((prev) => prev.filter(s => s.id !== id));
+    if (selectedShapeId === id) {
+       setSelectedShapeId(null);
+    }
+  };
+
+  const selectedShape = useMemo(() => studioShapes.find(s => s.id === selectedShapeId), [selectedShapeId, studioShapes]);
+
+  const studioSvgMarkup = useMemo(() => {
+    const shapesMarkup = studioShapes.map((shape) => {
+      const { x, y, size, color, rotation } = shape;
+      const transform = `rotate(${rotation} ${x} ${y})`;
+      if (shape.type === "circle") {
+        return `<circle cx="${x}" cy="${y}" r="${size}" fill="${color}" transform="${transform}" />`;
+      }
+      if (shape.type === "square") {
+        return `<rect x="${x - size}" y="${y - size}" width="${size * 2}" height="${size * 2}" fill="${color}" transform="${transform}" />`;
+      }
+      if (shape.type === "star") {
+        const pts = [];
+        for (let i = 0; i < 10; i++) {
+          const angle = (i * Math.PI) / 5 - Math.PI / 2;
+          const r = i % 2 === 0 ? size : size * 0.4;
+          pts.push(`${x + r * Math.cos(angle)},${y + r * Math.sin(angle)}`);
+        }
+        return `<polygon points="${pts.join(" ")}" fill="${color}" transform="${transform}" />`;
+      }
+      if (shape.type === "crescent") {
+        return `<path d="M ${x},${y - size} A ${size} ${size} 0 0 1 ${x},${y + size} A ${size * 0.8} ${size * 0.8} 0 0 0 ${x},${y - size} Z" fill="${color}" transform="${transform}" />`;
+      }
+      if (shape.type === "image" && shape.imageSrc) {
+        const aspect = shape.imageAspect || 1;
+        const w = size * 2;
+        const h = w / aspect;
+        return `<image href="${shape.imageSrc}" x="${x - w / 2}" y="${y - h / 2}" width="${w}" height="${h}" transform="${transform}" preserveAspectRatio="none" />`;
+      }
+      return "";
+    }).join("\n");
+
+    return [
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${pageWidthMm}mm" height="${pageHeightMm}mm" viewBox="0 0 ${pageWidthPx} ${pageHeightPx}">`,
+      `<rect width="100%" height="100%" fill="${studioBackgroundColor}" />`,
+      studioBackgroundImage ? `<image href="${studioBackgroundImage}" x="0" y="0" width="${pageWidthPx}" height="${pageHeightPx}" preserveAspectRatio="none" />` : "",
+      shapesMarkup,
+      `</svg>`,
+    ].filter(Boolean).join("\n");
+  }, [pageHeightMm, pageHeightPx, pageWidthMm, pageWidthPx, studioBackgroundColor, studioBackgroundImage, studioShapes]);
+
+  const exportStudioSvg = () => {
+    const blob = new Blob([studioSvgMarkup], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "加工站图案.svg";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportStudioPng = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(pageWidthPx);
+    canvas.height = Math.round(pageHeightPx);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.fillStyle = studioBackgroundColor;
+    ctx.fillRect(0, 0, pageWidthPx, pageHeightPx);
+
+    const img = new Image();
+    const svgStr = encodeURIComponent(studioSvgMarkup);
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0);
+      const dataUrl = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = "加工站图案.png";
+      link.click();
+    };
+    img.src = `data:image/svg+xml;charset=utf-8,${svgStr}`;
+  };
+
   return (
     <div className={`dotlab-root ${theme === "mono" ? "theme-mono" : "theme-default"}`}>
       <header className="dotlab-topbar">
@@ -1142,7 +1299,120 @@ export default function Home() {
             <button type="button" className={mode === "image" ? "active" : ""} onClick={() => setMode("image")}>
               图片风格化
             </button>
+            <button type="button" className={mode === "studio" ? "active" : ""} onClick={() => setMode("studio")}>
+              加工站
+            </button>
           </div>
+
+          {mode === "studio" && (
+            <>
+              <h2>DOCUMENT & LAYERS</h2>
+              <div className="dotlab-unit-switch" role="group" aria-label="添加图形" style={{ flexWrap: 'wrap' }}>
+                <button type="button" onClick={() => addStudioShape("circle")}>
+                 + 波点
+                </button>
+                <button type="button" onClick={() => addStudioShape("star")}>
+                 + 星星
+                </button>
+                <button type="button" onClick={() => addStudioShape("square")}>
+                 + 方块
+                </button>
+                <button type="button" onClick={() => addStudioShape("crescent")}>
+                 + 月牙
+                </button>
+                <div style={{ flexBasis: '100%', marginTop: '0.5rem' }}>
+                  <label className="dotlab-upload-btn" style={{ display: 'block', padding: '0.5rem', background: 'var(--border)', cursor: 'pointer', textAlign: 'center', borderRadius: '4px', color: 'var(--text)' }}>
+                    + 上传图片
+                    <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleStudioImageUpload} />
+                  </label>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', margin: '1.5rem 0' }}>
+                {studioShapes.map((shape) => (
+                  <div key={shape.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                     <label className="dotlab-checkbox" style={{ margin: 0 }}>
+                       <input type="radio" checked={selectedShapeId === shape.id} onChange={() => setSelectedShapeId(shape.id)} />
+                       {shape.type.toUpperCase()} ({shape.id.substring(0, 4)})
+                     </label>
+                     <button type="button" onClick={() => removeStudioShape(shape.id)} style={{ padding: '2px 8px', fontSize: '0.8rem', background: 'transparent', color: 'var(--text)', border: '1px solid var(--border)' }}>x</button>
+                  </div>
+                ))}
+              </div>
+
+              {selectedShapeId && selectedShape && (
+                <>
+                  <h2>PROPERTIES</h2>
+                  <div className="dotlab-grid-2">
+                    <label>
+                      X
+                      <input
+                         type="range" min="0" max={pageWidthPx} step="1"
+                         value={Math.round(selectedShape.x)}
+                         onChange={(e) => updateStudioShape(selectedShapeId, { x: Number(e.target.value) })}
+                      />
+                    </label>
+                    <label>
+                      Y
+                      <input
+                         type="range" min="0" max={pageHeightPx} step="1"
+                         value={Math.round(selectedShape.y)}
+                         onChange={(e) => updateStudioShape(selectedShapeId, { y: Number(e.target.value) })}
+                      />
+                    </label>
+                  </div>
+                  <div className="dotlab-grid-2">
+                    <label>
+                      Size
+                      <input
+                         type="range" min="1" max={Math.max(pageWidthPx, pageHeightPx)} step="1"
+                         value={Math.round(selectedShape.size)}
+                         onChange={(e) => updateStudioShape(selectedShapeId, { size: Number(e.target.value) })}
+                      />
+                    </label>
+                    <label>
+                      Rot
+                      <input
+                         type="range" min="-180" max="180" step="1"
+                         value={Math.round(selectedShape.rotation)}
+                         onChange={(e) => updateStudioShape(selectedShapeId, { rotation: Number(e.target.value) })}
+                      />
+                    </label>
+                  </div>
+                  <label>
+                     Color
+                     <input type="color" value={selectedShape.color} onChange={(e) => updateStudioShape(selectedShapeId, { color: e.target.value })} />
+                  </label>
+                </>
+              )}
+
+              <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
+                 <label>
+                    画布背景颜色
+                    <input type="color" value={studioBackgroundColor} onChange={(e) => setStudioBackgroundColor(e.target.value)} />
+                 </label>
+                 <label className="dotlab-upload-btn" style={{ display: 'block', padding: '0.5rem', background: 'var(--border)', cursor: 'pointer', textAlign: 'center', borderRadius: '4px', color: 'var(--text)', marginTop: '0.5rem' }}>
+                    {studioBackgroundImage ? "更换背景图片" : "+ 上传背景图片"}
+                    <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleStudioBgImageUpload} />
+                 </label>
+                 {studioBackgroundImage && (
+                    <button type="button" style={{ display: 'block', width: '100%', marginTop: '0.5rem' }} onClick={() => setStudioBackgroundImage(null)}>
+                      移出背景图片
+                    </button>
+                 )}
+              </div>
+
+              <h2>OUTPUT</h2>
+              <div className="dotlab-actions">
+                <button type="button" onClick={exportStudioPng}>
+                  导出 PNG
+                </button>
+                <button type="button" onClick={exportStudioSvg}>
+                  导出 SVG
+                </button>
+              </div>
+            </>
+          )}
 
           {mode === "dot" && (
             <>
@@ -1886,6 +2156,16 @@ export default function Home() {
             </>
           )}
         </section>
+
+        {mode === "studio" && (
+          <section className="dotlab-preview-wrap" aria-label="加工站预览区">
+            <div className="dotlab-preview-scroll" aria-label="画布滚动区域">
+              <div className="dotlab-preview-board" style={{ display: 'flex', justifyContent: 'center' }}>
+                <div dangerouslySetInnerHTML={{ __html: studioSvgMarkup }} />
+              </div>
+            </div>
+          </section>
+        )}
 
         {mode === "dot" && (
           <section className="dotlab-preview-wrap" aria-label="图案预览区">
